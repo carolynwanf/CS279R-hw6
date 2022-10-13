@@ -1,27 +1,59 @@
 <script>
-  import Task from './Task.svelte';
+  // Import task form stuff
   import { TasksCollection } from '../api/TasksCollections';
-  import { useTracker } from 'meteor/rdb:svelte-meteor-data';
-  import TaskForm from './TaskForm.svelte'
+  import Task from './Task.svelte';
+  import TaskForm from './TaskForm.svelte';
 
-  // Reactive statement to get and maintain tasks
-  $: tasks = useTracker(() => TasksCollection.find({}).fetch());
+  // Variables for incomplete tasks
+  let incompleteCount;
+  let pendingTasks = '(0)';
+  let tasks = [];
+
+  // Var and setter for hiding completed tasks
+  let hideCompleted = false;
+  // variable to check if hide completed filter is true or false
+  const hideCompletedFilter = { isChecked: { $ne: true } };
+
+  const setHideCompleted = (value) => {
+    hideCompleted = value;
+  };
+
+  $m: {
+    // Get tasks from database
+    tasks = TasksCollection.find(hideCompleted ? hideCompletedFilter : {}, {
+      sort: { createdAt: -1 },
+    }).fetch();
+
+    // Recording incomplete tasks
+    incompleteCount = TasksCollection.find(hideCompletedFilter).count();
+    pendingTasks = `${incompleteCount ? ` (${incompleteCount})` : '(0)'}`;
+  }
+
 </script>
 
-
-<div class="container">
+<div class="app">
   <header>
-    <h1>Todo List</h1> 
+    <div class="app-bar">
+      <div class="app-header">
+        <!-- Header with incomplete tasks -->
+        <h1>Todos {pendingTasks}</h1>
+      </div>
+    </div>
   </header>
 
-  <!-- Rendering task form element -->
-  <TaskForm/>
-
-  <ul>
-    <!-- Using template language to render tasks -->
-    {#each tasks as task (task._id)}
-      <Task task={task}/>
-    {/each}
-  </ul>
-
+  <div class="main">
+    <TaskForm />
+    <div class="filter">
+      <!-- Show completed button -->
+      <button on:click={() => setHideCompleted(!hideCompleted)}>
+        {hideCompleted ? 'Show All' : 'Hide Completed'}
+      </button>
+    </div>
+    <ul class="tasks" style="list-style:none;">
+      <!-- Uses template laguage to render Task element for each task -->
+      {#each tasks as task (task._id)}
+        <Task task={task} />
+      {/each}
+    </ul>
+  </div>
 </div>

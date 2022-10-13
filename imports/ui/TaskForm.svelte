@@ -1,23 +1,23 @@
+
 <script>
     import { TasksCollection } from '../api/TasksCollections';
-
+    
+    // Initialize newTask to empty
     let newTask = '';
-
-    // Function for handling form submittions
+  
+    // Add task to database on submit
     const handleSubmit = () => {
-        // Insert a task into the collection
-        TasksCollection.insert({
-            text: newTask,
-            createdAt: new Date(), // current time
-        });
-
-        // Clear form
-        newTask = '';
+      TasksCollection.insert({
+        text: newTask,
+        createdAt: new Date(), 
+      });
+  
+      newTask = '';
     }
-</script>
+  </script>
 
-<!-- Actual form to render -->
-<form class="task-form" on:submit|preventDefault={handleSubmit}>
+  <!-- Form for adding tasks -->
+  <form class="task-form" on:submit|preventDefault={handleSubmit}>
     <input
             type="text"
             name="text"
@@ -25,4 +25,4 @@
             bind:value={newTask}
     />
     <button type="submit">Add Task</button>
-</form>
+  </form>
